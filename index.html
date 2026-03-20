@@ -1,145 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>City Wide AI Discovery Assistant</title>
+<title>City Wide Discovery Assistant</title><style>
+body {font-family: Arial; background:#eef4fb; padding:20px;}
+.container {max-width:500px; margin:auto; background:white; padding:20px; border-radius:12px;}
+h2{margin-top:0;}
+input, textarea {width:100%; padding:10px; margin-top:5px;}
+button {width:100%; padding:12px; margin-top:10px; background:#1d4f91; color:white; border:none; border-radius:8px;}
+.secondary {background:#ccc; color:#000;}
+.hidden {display:none;}
+.chip {display:inline-block; padding:8px; margin:4px; background:#ddd; border-radius:8px;}
+</style></head><body><div class="container"><!-- PRECALL --><div id="precall">
+<h2>Pre-Call Setup</h2><label>Company Name</label>
+<input id="company">
 
-<style>
-body {
-  font-family: Arial;
-  background: #eef4fb;
-  padding: 20px;
-}
+<label>Contact Name</label>
+<input id="contact">
 
-.container {
-  max-width: 500px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-}
+<label>Website</label>
+<input id="website">
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: #1d4f91;
-  color: white;
-  border: none;
-  border-radius: 8px;
-}
+<button onclick="researchCompany()">Research Company</button>
+<button onclick="researchContact()">Research Contact</button>
 
-.hidden {
-  display: none;
-}
-</style>
-</head>
+<div id="researchOutput"></div><button onclick="startSurvey()">Begin Discovery</button>
 
-<body>
+</div><!-- QUESTIONS --><div id="questions" class="hidden">
+<h2 id="qTitle"></h2><div id="options"></div><textarea id="notes" placeholder="Add notes (optional)"></textarea><button onclick="nextQuestion()">Next</button>
 
-<div class="container">
+</div><!-- SUMMARY --><div id="summary" class="hidden">
+<h2>Summary</h2>
+<pre id="summaryText"></pre><button>Edit Summary</button>
+<button>Link to CRM</button>
 
-<h2>City Wide AI Discovery Assistant</h2>
-
-<div id="start">
-  <label>Company Name</label>
-  <input id="company" style="width:100%;padding:10px">
-
-  <label>Contact Name</label>
-  <input id="contact" style="width:100%;padding:10px">
-
-  <button onclick="start()">Start Discovery</button>
-</div>
-
-<div id="qa" class="hidden">
-  <h3 id="question"></h3>
-  <textarea id="answer" style="width:100%;padding:10px"></textarea>
-
-  <div id="suggestions"></div>
-
-  <button onclick="next()">Next</button>
-</div>
-
-<div id="summary" class="hidden">
-  <h3>Summary</h3>
-  <pre id="output"></pre>
-</div>
-
-</div>
-
-<script>
+</div></div><script>
 
 let step = 0;
 
 const questions = [
-"What part of managing this today creates the most frustration?",
-"Where are issues most visible?",
-"What would make a service partner easier to manage?",
-"What happens when issues aren’t handled quickly?"
+{
+q:"What challenges are you currently facing?",
+options:["Inconsistent service","Too many vendors","Poor communication","Lack of accountability"]
+},
+{
+q:"Where are issues most visible?",
+options:["Restrooms","Common areas","Tenant complaints","Inspections"]
+},
+{
+q:"What would make your job easier?",
+options:["One point of contact","Faster response","Better quality control","Less oversight needed"]
+}
 ];
 
 let answers = [];
 
-function start(){
-  document.getElementById("start").classList.add("hidden");
-  document.getElementById("qa").classList.remove("hidden");
-  loadQuestion();
+function researchCompany(){
+document.getElementById("researchOutput").innerHTML = 
+"Company appears to manage multiple locations with high service expectations.";
+}
+
+function researchContact(){
+document.getElementById("researchOutput").innerHTML += 
+"<br>Contact is likely focused on efficiency and vendor reliability.";
+}
+
+function startSurvey(){
+document.getElementById("precall").classList.add("hidden");
+document.getElementById("questions").classList.remove("hidden");
+loadQuestion();
 }
 
 function loadQuestion(){
-  document.getElementById("question").innerText = questions[step];
-  document.getElementById("answer").value = "";
+document.getElementById("qTitle").innerText = questions[step].q;
 
-  let suggestions = [
-    "Vendor follow-up takes too much time",
-    "Too many complaints",
-    "Service is inconsistent",
-    "I'm managing too many vendors"
-  ];
+let optDiv = document.getElementById("options");
+optDiv.innerHTML = "";
 
-  let box = document.getElementById("suggestions");
-  box.innerHTML = "";
-
-  suggestions.forEach(s => {
-    let btn = document.createElement("button");
-    btn.innerText = s;
-    btn.onclick = () => {
-      document.getElementById("answer").value = s;
-    };
-    box.appendChild(btn);
-  });
+questions[step].options.forEach(opt=>{
+let btn = document.createElement("button");
+btn.innerText = opt;
+btn.onclick = ()=>selectAnswer(opt);
+optDiv.appendChild(btn);
+});
 }
 
-function next(){
-  let val = document.getElementById("answer").value;
-  answers.push(val);
+function selectAnswer(opt){
+document.getElementById("notes").value = opt;
+}
 
-  step++;
+function nextQuestion(){
+answers.push(document.getElementById("notes").value);
+document.getElementById("notes").value="";
 
-  if(step < questions.length){
-    loadQuestion();
-  } else {
-    buildSummary();
-  }
+step++;
+
+if(step < questions.length){
+loadQuestion();
+} else {
+buildSummary();
+}
 }
 
 function buildSummary(){
-  document.getElementById("qa").classList.add("hidden");
-  document.getElementById("summary").classList.remove("hidden");
+document.getElementById("questions").classList.add("hidden");
+document.getElementById("summary").classList.remove("hidden");
 
-  let summary = `
+let summary = `
 Company: ${document.getElementById("company").value}
 Contact: ${document.getElementById("contact").value}
 
 Key Findings:
 ${answers.join("\n")}
-  `;
+`;
 
-  document.getElementById("output").innerText = summary;
+document.getElementById("summaryText").innerText = summary;
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
