@@ -3,10 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Discovery Demo</title>
+<title>City Wide AI Discovery Demo</title>
 
 <style>
-body{font-family:Arial;background:#eef4fb;margin:0;padding:20px;color:#17324d}
-.container{max-width:500px;margin:auto;background:#fff;padding:20px;border-radius:12px}
+body{
+  font-family: Arial;
+  background:#eef4fb;
+  margin:0;
+  padding:20px;
+  color:#17324d;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
 h2{margin-top:0}
-button{padding:10px;margin-top:10px;border:none;border-radius:8px;background:#1d
+
+button{
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#1d4f91;
+  color:#fff;
+  font-weight:bold;
+  width:100%;
+}
+
+textarea, input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.box{
+  background:#f4f8ff;
+  padding:12px;
+  border-radius:8px;
+  margin-top:15px;
+}
+
+.chip{
+  display:inline-block;
+  padding:8px;
+  background:#e1ecff;
+  border-radius:20px;
+  margin:5px;
+  cursor:pointer;
+}
+
+.summary{
+  white-space:pre-wrap;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>City Wide AI Discovery Assistant</h2>
+
+<label>Company Name</label>
+<input id="company">
+
+<label>Contact Name</label>
+<input id="contact">
+
+<button onclick="start()">Start Discovery</button>
+
+<div id="section"></div>
+
+</div>
+
+<script>
+
+let step = 0;
+let data = {
+  pain:"",
+  location:"",
+  ease:"",
+  impact:"",
+  notes:""
+};
+
+function start(){
+  step = 0;
+  next();
+}
+
+function next(choice=null){
+
+  if(choice){
+    if(step===0) data.pain = choice;
+    if(step===1) data.location = choice;
+    if(step===2) data.ease = choice;
+    if(step===3) data.impact = choice;
+  }
+
+  let html = "";
+
+  if(step === 0){
+    html = `
+    <h3>What creates the most frustration?</h3>
+
+    <div class="chip" onclick="next('Vendor issues')">Vendor issues</div>
+    <div class="chip" onclick="next('Communication gaps')">Communication gaps</div>
+    <div class="chip" onclick="next('Inconsistent service')">Inconsistent service</div>
+
+    <textarea placeholder="Additional notes..." id="notes"></textarea>
+
+    <div class="box">
+    <b>AI Coach Guidance</b><br>
+    Identify root cause behind dissatisfaction to guide deeper discovery.
+    </div>
+    `;
+  }
+
+  if(step === 1){
+    html = `
+    <h3>Where are issues most visible?</h3>
+
+    <div class="chip" onclick="next('Restrooms')">Restrooms</div>
+    <div class="chip" onclick="next('Trash')">Trash</div>
+    <div class="chip" onclick="next('Common areas')">Common areas</div>
+
+    <textarea placeholder="Additional notes..." id="notes"></textarea>
+
+    <div class="box">
+    <b>AI Coach Guidance</b><br>
+    Pinpoint high-visibility problem areas to increase urgency.
+    </div>
+    `;
+  }
+
+  if(step === 2){
+    html = `
+    <h3>What would make this easier to manage?</h3>
+
+    <div class="chip" onclick="next('Single point of contact')">Single point of contact</div>
+    <div class="chip" onclick="next('Better communication')">Better communication</div>
+    <div class="chip" onclick="next('More consistency')">More consistency</div>
+
+    <textarea placeholder="Additional notes..." id="notes"></textarea>
+
+    <div class="box">
+    <b>AI Coach Guidance</b><br>
+    Align your solution directly to their desired outcome.
+    </div>
+    `;
+  }
+
+  if(step === 3){
+    html = `
+    <h3>What happens when issues aren’t resolved?</h3>
+
+    <div class="chip" onclick="next('Complaints increase')">Complaints increase</div>
+    <div class="chip" onclick="next('Tenant dissatisfaction')">Tenant dissatisfaction</div>
+    <div class="chip" onclick="next('Operational disruption')">Operational disruption</div>
+
+    <textarea placeholder="Additional notes..." id="notes"></textarea>
+
+    <div class="box">
+    <b>AI Coach Guidance</b><br>
+    Quantify impact to strengthen urgency and value.
+    </div>
+    `;
+  }
+
+  if(step === 4){
+    html = `
+    <h3>Summary</h3>
+
+    <div class="box summary">
+Company: ${document.getElementById("company").value}
+Contact: ${document.getElementById("contact").value}
+
+Pain Point: ${data.pain}
+Visible Issues: ${data.location}
+Desired Outcome: ${data.ease}
+Impact: ${data.impact}
+    </div>
+
+    <button onclick="edit()">Edit Summary</button>
+    <button onclick="alert('Simulated CRM Push')">Push to CRM</button>
+    `;
+  }
+
+  document.getElementById("section").innerHTML = html;
+
+  step++;
+
+}
+
+function edit(){
+  step = 0;
+  next();
+}
+
+</script>
+
+</body>
+</html>
