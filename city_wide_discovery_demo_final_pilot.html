@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City Wide Discovery Assistant Demo - Final Pilot Concept</title>
+  <style>
+    :root{
+      --ink:#17324d;
+      --muted:#64748b;
+      --line:#d9e2ec;
+      --brand:#1d4f91;
+      --brand2:#2b6cb0;
+      --soft:#eef4fb;
+      --pill:#e8f0fb;
+      --shadow:0 10px 30px rgba(20,42,70,.08);
+      --radius:18px;
+      --success:#0f766e;
+      --warn:#b45309;
+      --warnbg:#fff7ed;
+      --okbg:#eef7f5;
+      --card:#ffffff;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#edf4fb 0%, #f8fbfe 100%);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--ink);
+    }
+    .wrap{max-width:560px;margin:0 auto;padding:14px 14px 40px}
+    .hero{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#fff;border-radius:24px;padding:18px 18px 16px;box-shadow:var(--shadow);margin-bottom:14px;
+    }
+    .hero h1{font-size:1.22rem;margin:0 0 6px;line-height:1.2}
+    .hero p{margin:0;opacity:.94;font-size:.93rem;line-height:1.4}
+    .small-note{font-size:.8rem;opacity:.9;margin-top:10px}
+    .statusbar{
+      display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0;
+    }
+    .badge{
+      display:inline-block;padding:8px 10px;border-radius:999px;font-size:.78rem;font-weight:800
+    }
+    .badge.offline{background:var(--warnbg);color:var(--warn)}
+    .badge.online{background:var(--okbg);color:var(--success)}
+    .badge.local{background:#eef2ff;color:#3746a6}
+
+    .tabs{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px;
+      position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#edf4fb 0%, #f8fbfe 100%);
+      padding-top:6px;padding-bottom:4px;
+    }
+    .tab-btn{
+      border:none;background:#fff;color:var(--brand);padding:12px 8px;border-radius:14px;
+      font-weight:700;box-shadow:var(--shadow);cursor:pointer;font-size:.88rem;
+    }
+    .tab-btn.active{background:var(--brand);color:#fff}
+    .panel{
+      display:none;background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);
+      border:1px solid #eef2f7;
+    }
+    .panel.active{display:block}
+    h2{font-size:1.05rem;margin:0 0 8px}
+    .sub{color:var(--muted);font-size:.9rem;margin:0 0 14px;line-height:1.45}
+    label{display:block;font-size:.88rem;font-weight:700;margin:12px 0 6px}
+    input, textarea, select{
+      width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:.95rem;background:#fff;color:var(--ink)
+    }
+    textarea{min-height:88px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .research-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .chip{
+      border:1px solid #c9d7e7;background:var(--pill);color:var(--brand);padding:10px 12px;border-radius:999px;
+      font-size:.88rem;font-weight:700;cursor:pointer;user-select:none;
+    }
+    .chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button.primary, button.secondary, button.inline, button.nextbtn, button.crm-btn, button.ghost{
+      border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;
+    }
+    button.primary{background:var(--brand);color:#fff;flex:1}
+    button.secondary{background:#e8eef6;color:var(--ink)}
+    button.inline{background:#e8eef6;color:var(--brand);white-space:nowrap}
+    button.nextbtn{
+      width:100%;background:linear-gradient(135deg,#1d4f91,#376fb7);color:#fff;text-align:center;box-shadow:var(--shadow);font-size:.96rem;
+    }
+    button.crm-btn{
+      background:var(--okbg);color:var(--success);border:1px solid #c7eadf;cursor:default;
+    }
+    button.ghost{
+      background:#fff;border:1px solid #d7e3ef;color:var(--ink)
+    }
+
+    .section-title{
+      font-size:.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px;font-weight:800;
+    }
+    .summary-box,.research-report{
+      background:#f8fbff;border:1px solid #dce9f8;border-radius:14px;padding:14px;white-space:pre-wrap;line-height:1.5;font-size:.94rem;
+    }
+    .pill-note{
+      display:inline-block;margin-top:8px;background:var(--okbg);color:var(--success);padding:8px 10px;border-radius:999px;font-size:.8rem;font-weight:700;
+    }
+    .footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:16px}
+    .qa-progress{display:flex;gap:8px;margin:12px 0 16px}
+    .qa-dot{flex:1;height:8px;border-radius:999px;background:#dbe6f3}
+    .qa-dot.active{background:var(--brand)}
+    .question-card{
+      background:var(--soft);border:1px solid #d9e7f7;padding:16px;border-radius:16px;margin:10px 0 14px;
+    }
+    .question-label{
+      font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin-bottom:6px;
+    }
+    .question-text{font-size:1.06rem;line-height:1.4;font-weight:800;margin-bottom:12px}
+    .helper{color:var(--muted);font-size:.86rem;line-height:1.4;margin-bottom:10px}
+    .answer-log{
+      background:#fbfdff;border:1px solid #dde8f5;border-radius:14px;padding:12px;margin-top:12px;
+    }
+    .answer-log-item{padding:10px 0;border-bottom:1px solid #ebf1f7}
+    .answer-log-item:last-child{border-bottom:none}
+    .answer-log-item strong{display:block;margin-bottom:4px;font-size:.88rem}
+    .signal-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .research-report{display:none;margin-top:14px}
+    .research-actions{display:none;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .optional-note{
+      margin-top:12px;background:#fff;border:1px dashed #cddced;border-radius:12px;padding:10px;
+    }
+    .optional-note label{margin-top:0}
+    .edit-area{display:none}
+    .save-note{
+      margin-top:10px;font-size:.8rem;color:var(--muted)
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="topPage">
+    <div class="hero">
+      <h1>City Wide AI Discovery Assistant Demo</h1>
+      <p>Guided discovery pilot concept with simulated research, likely-answer prompts, optional rep notes, editable summary, and CRM handoff concept.</p>
+      <div class="small-note">Local single-file demo. All data is saved in your browser so the flow still works even with weak or interrupted internet.</div>
+      <div class="statusbar">
+        <span class="badge online" id="netStatus">Online</span>
+        <span class="badge local">Local Save Enabled</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="prep">Pre-Call</button>
+      <button class="tab-btn" data-tab="qa">Q&amp;A Flow</button>
+      <button class="tab-btn" data-tab="call">Live Call</button>
+      <button class="tab-btn" data-tab="summary">Summary</button>
+    </div>
+
+    <section id="prep" class="panel active">
+      <h2>Pre-Call Setup</h2>
+      <p class="sub">Enter prospect details and simulate company/contact research before starting the guided survey.</p>
+
+      <label for="company">Company / Property</label>
+      <input id="company" placeholder="Example: Harbor View Medical Plaza" />
+
+      <div class="row">
+        <div>
+          <label for="role">Role</label>
+          <input id="role" placeholder="Property Manager" />
+        </div>
+        <div>
+          <label for="propertyType">Property Type</label>
+          <select id="propertyType">
+            <option value="">Select one</option>
+            <option>Medical</option>
+            <option>Office</option>
+            <option>Industrial</option>
+            <option>Retail</option>
+            <option>Mixed Use</option>
+            <option>School / Education</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="sites">Sites / Buildings</label>
+      <input id="sites" placeholder="1" />
+
+      <label for="website">Customer Website</label>
+      <div class="research-row">
+        <input id="website" placeholder="example.com" />
+        <button class="inline" id="researchCompanyBtn">Research Company</button>
+      </div>
+
+      <label for="contact">Main Contact</label>
+      <div class="research-row">
+        <input id="contact" placeholder="Example: Hannah Carter" />
+        <button class="inline" id="researchContactBtn">Research Contact</button>
+      </div>
+
+      <label for="context">Known Context / Research Notes</label>
+      <textarea id="context" placeholder="Example: Multi-site operation. Complaints around restrooms, trash, and vendor follow-up. Wants one point of contact."></textarea>
+
+      <label for="approach">Suggested Meeting Approach</label>
+      <textarea id="approach" placeholder="Example: Lead with workload reduction, visible complaint areas, and one accountable point of contact."></textarea>
+
+      <div class="btns">
+        <button class="primary" id="toQaBtn">Start Guided Q&amp;A</button>
+        <button class="secondary" id="loadDemoBtn">Load Sample Data</button>
+      </div>
+
+      <div class="section-title">Simulated Research Reports</div>
+      <div class="research-report" id="companyReport"></div>
+      <div class="research-report" id="contactReport"></div>
+
+      <div class="research-actions" id="researchActions">
+        <button class="secondary" id="backToTopBtn">Return to Top</button>
+        <button class="primary" id="beginSurveyBtn">Begin Survey</button>
+      </div>
+    </section>
+
+    <section id="qa" class="panel">
+      <h2>Guided Discovery Flow</h2>
+      <p class="sub">Tap the most likely answer, add optional notes if needed, then tap Next to continue the guided discovery flow.</p>
+
+      <div class="qa-progress">
+        <div class="qa-dot active" id="dot1"></div>
+        <div class="qa-dot" id="dot2"></div>
+        <div class="qa-dot" id="dot3"></div>
+        <div class="qa-dot" id="dot4"></div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-label" id="qLabel">Question 1 of 4</div>
+        <div class="question-text" id="qText">What part of managing this today creates the most frustration for you?</div>
+        <div class="helper" id="qHelper">Use a likely-answer option or type the prospect’s answer directly.</div>
+
+        <label for="qaAnswer">Prospect Answer</label>
+        <textarea id="qaAnswer" placeholder="Type the answer here..."></textarea>
+
+        <div class="section-title">Most Likely Answers</div>
+        <div class="chips" id="quickAnswers"></div>
+
+        <div class="optional-note">
+          <label for="qaExtraNote">Additional Rep Note (optional)</label>
+          <textarea id="qaExtraNote" placeholder="Capture anything the prospect disclosed beyond the selected answer..."></textarea>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="secondary" id="prevQBtn">Previous</button>
+        <button class="secondary" id="saveQBtn">Save Answer</button>
+      </div>
+
+      <div class="section-title">Next Step</div>
+      <button class="nextbtn" id="smartNextBtn">Next</button>
+
+      <div class="section-title">Captured Answers</div>
+      <div class="answer-log" id="answerLog">
+        <div class="helper">Answers will appear here after they are saved.</div>
+      </div>
+    </section>
+
+    <section id="call" class="panel">
+      <h2>Live Call Capture</h2>
+      <p class="sub">After the guided questions, capture the core themes, objections, call signals, and value drivers without adding typing burden.</p>
+
+      <div class="signal-grid">
+        <div>
+          <div class="section-title">Timeline</div>
+          <div class="chips" id="timeline">
+            <div class="chip">Immediate</div>
+            <div class="chip">30–60 days</div>
+            <div class="chip">Quarterly review</div>
+            <div class="chip">Just exploring</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Authority</div>
+          <div class="chips" id="authority">
+            <div class="chip">Decision maker</div>
+            <div class="chip">Influencer</div>
+            <div class="chip">Committee / multiple stakeholders</div>
+            <div class="chip">Unknown</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Interest Level</div>
+          <div class="chips" id="interest">
+            <div class="chip">High</div>
+            <div class="chip">Medium</div>
+            <div class="chip">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Issues Most Visible</div>
+      <div class="chips" id="issues">
+        <div class="chip">Restrooms</div>
+        <div class="chip">Trash</div>
+        <div class="chip">Floors</div>
+        <div class="chip">Dusting</div>
+        <div class="chip">Vendor follow-up</div>
+        <div class="chip">Communication</div>
+        <div class="chip">Consistency</div>
+        <div class="chip">Day porter need</div>
+      </div>
+
+      <div class="section-title">Common Objections / Concerns</div>
+      <div class="chips" id="objections">
+        <div class="chip">Happy with current vendor</div>
+        <div class="chip">Price sensitive</div>
+        <div class="chip">No time to manage another vendor</div>
+        <div class="chip">Need proof of consistency</div>
+        <div class="chip">Past bad experience</div>
+      </div>
+
+      <div class="section-title">Decision Drivers</div>
+      <div class="chips" id="drivers">
+        <div class="chip">Make my job easier</div>
+        <div class="chip">One point of contact</div>
+        <div class="chip">Reduce complaints</div>
+        <div class="chip">Fast response time</div>
+        <div class="chip">Better accountability</div>
+        <div class="chip">Flexible scope</div>
+      </div>
+
+      <div class="section-title">Additional Details Worth Capturing</div>
+      <div class="chips" id="details">
+        <div class="chip">Multi-site complexity</div>
+        <div class="chip">Current vendor gaps</div>
+        <div class="chip">Escalation risk</div>
+        <div class="chip">Tenant-facing issues</div>
+        <div class="chip">Ownership visibility</div>
+        <div class="chip">No formal scope today</div>
+      </div>
+
+      <label for="notes">Rep Notes</label>
+      <textarea id="notes" placeholder="Capture additional details, timing, scope concerns, and next steps."></textarea>
+
+      <div class="btns">
+        <button class="secondary" id="suggestBtn">Suggest Next Question</button>
+        <button class="primary" id="buildSummaryBtn">Generate Summary</button>
+      </div>
+
+      <div class="section-title">Suggested Next Best Question</div>
+      <div class="summary-box" id="nextQuestion">Tap “Suggest Next Question” to generate a mock next-best question based on selections and answers.</div>
+    </section>
+
+    <section id="summary" class="panel">
+      <h2>Meeting Summary</h2>
+      <p class="sub">This simulates the post-call output after guided questions, signal capture, live call notes, and human edits.</p>
+      <div class="pill-note">Mock AI-generated output</div>
+
+      <div class="section-title">Summary Output</div>
+      <div class="summary-box" id="summaryOutput">No summary yet. Complete the first three tabs, then tap “Generate Summary.”</div>
+
+      <div class="edit-area" id="editArea">
+        <label for="editableSummary">Edit Summary</label>
+        <textarea id="editableSummary" style="min-height:320px"></textarea>
+      </div>
+
+      <div class="btns">
+        <button class="crm-btn">Link to CRM</button>
+        <button class="ghost" id="editSummaryBtn">Edit Summary</button>
+        <button class="ghost" id="saveSummaryBtn" style="display:none">Save Changes</button>
+        <button class="ghost" id="cancelEditBtn" style="display:none">Cancel</button>
+        <button class="secondary" id="copyBtn">Copy Summary</button>
+        <button class="secondary" id="resetBtn">Reset Demo</button>
+      </div>
+      <div class="save-note">Session auto-saves locally in your browser.</div>
+    </section>
+
+    <div class="footer">
+      Local single-file demo • Offline-resilient browser save • Person-specific simulated contact research • Editable summary
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "city_wide_discovery_demo_final";
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.panel');
+
+    const questions = [
+      {
+        label: "Question 1 of 4",
+        text: "What part of managing this today creates the most frustration for you?",
+        helper: "Open with workload and friction. This helps reveal where City Wide could make the prospect's job easier.",
+        quick: [
+          "Following up with vendors takes too much time.",
+          "I don't hear about issues until they escalate.",
+          "Too many complaints from tenants or staff.",
+          "Service is inconsistent from area to area.",
+          "I'm managing too many vendors.",
+          "Nothing major — just a lot of small issues adding up."
+        ]
+      },
+      {
+        label: "Question 2 of 4",
+        text: "Where are service issues most visible to tenants, staff, or visitors?",
+        helper: "Shift into visibility and impact. This identifies high-priority pain points to build a stronger scope around.",
+        quick: [
+          "Restrooms and trash are the biggest complaints.",
+          "Lobby and common areas shape the first impression.",
+          "Issues are spread throughout the property.",
+          "Certain wings or suites get more complaints than others.",
+          "The biggest issue is inconsistency from one area to another.",
+          "Problems usually become visible only after someone complains."
+        ]
+      },
+      {
+        label: "Question 3 of 4",
+        text: "What would make a service partner truly easier for you to manage?",
+        helper: "Move into buying criteria and management burden. This sharpens the real value proposition.",
+        quick: [
+          "I want one point of contact who actually follows through.",
+          "I need faster response and better accountability.",
+          "I need fewer complaints without adding more to my plate.",
+          "I want less time spent chasing vendors.",
+          "I want clear communication and documented follow-up.",
+          "I need more consistency across all locations."
+        ]
+      },
+      {
+        label: "Question 4 of 4",
+        text: "What happens when these issues are not handled quickly?",
+        helper: "Capture consequence and urgency. This is often where the buying motivation really shows up.",
+        quick: [
+          "Tenants or staff complain.",
+          "It reflects poorly on management.",
+          "It takes time away from the rest of my day.",
+          "Issues escalate and become harder to solve.",
+          "The same problems keep coming back.",
+          "Ownership notices when service levels slip."
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let companyResearchText = "";
+    let contactResearchText = "";
+    let generatedSummary = "";
+    let summaryBeforeEdit = "";
+
+    const state = {
+      answers: ["", "", "", ""],
+      extraNotes: ["", "", "", ""]
+    };
+
+    function scrollToTopInstant(){
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      const wrap = document.querySelector('.wrap');
+      if (wrap) wrap.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+
+    function switchTab(name){
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      panels.forEach(p => p.classList.toggle('active', p.id === name));
+      persist();
+      setTimeout(scrollToTopInstant, 0);
+    }
+
+    tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+    function selectedFrom(id){
+      return [...document.querySelectorAll(`#${id} .chip.active`)].map(el => el.textContent.trim());
+    }
+
+    function setChipSelections(id, values){
+      const set = new Set(values || []);
+      document.querySelectorAll(`#${id} .chip`).forEach(chip => {
+        chip.classList.toggle('active', set.has(chip.textContent.trim()));
+      });
+    }
+
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+        persist();
+      });
+    });
+
+    const qLabel = document.getElementById('qLabel');
+    const qText = document.getElementById('qText');
+    const qHelper = document.getElementById('qHelper');
+    const qaAnswer = document.getElementById('qaAnswer');
+    const qaExtraNote = document.getElementById('qaExtraNote');
+    const quickAnswers = document.getElementById('quickAnswers');
+    const answerLog = document.getElementById('answerLog');
+    const smartNextBtn = document.getElementById('smartNextBtn');
+
+    function renderQuickAnswers(items){
+      quickAnswers.innerHTML = "";
+      items.forEach(text => {
+        const btn = document.createElement('div');
+        btn.className = 'chip';
+        btn.textContent = text;
+        btn.addEventListener('click', () => {
+          qaAnswer.value = text;
+          persist();
+        });
+        quickAnswers.appendChild(btn);
+      });
+    }
+
+    function renderQuestion(){
+      const q = questions[currentQuestion];
+      qLabel.textContent = q.label;
+      qText.textContent = q.text;
+      qHelper.textContent = q.helper;
+      qaAnswer.value = state.answers[currentQuestion] || "";
+      qaExtraNote.value = state.extraNotes[currentQuestion] || "";
+      renderQuickAnswers(q.quick);
+
+      document.getElementById('dot1').classList.toggle('active', currentQuestion === 0);
+      document.getElementById('dot2').classList.toggle('active', currentQuestion === 1);
+      document.getElementById('dot3').classList.toggle('active', currentQuestion === 2);
+      document.getElementById('dot4').classList.toggle('active', currentQuestion === 3);
+
+      smartNextBtn.textContent = currentQuestion < questions.length - 1 ? "Next" : "Finish Guided Flow";
+      scrollToTopInstant();
+    }
+
+    function renderAnswerLog(){
+      const filled = state.answers.map((a, i) => ({answer: a.trim(), note: state.extraNotes[i].trim(), idx: i})).filter(x => x.answer || x.note);
+      if (!filled.length){
+        answerLog.innerHTML = '<div class="helper">Answers will appear here after they are saved.</div>';
+        return;
+      }
+      answerLog.innerHTML = filled.map(item => `
+        <div class="answer-log-item">
+          <strong>${questions[item.idx].label}: ${questions[item.idx].text}</strong>
+          <div>${item.answer || 'No answer captured'}</div>
+          ${item.note ? `<div style="margin-top:6px;color:#64748b"><em>Rep note:</em> ${item.note}</div>` : ``}
+        </div>
+      `).join('');
+    }
+
+    function saveCurrentQA(){
+      state.answers[currentQuestion] = qaAnswer.value.trim();
+      state.extraNotes[currentQuestion] = qaExtraNote.value.trim();
+      renderAnswerLog();
+      persist();
+    }
+
+    document.getElementById('saveQBtn').addEventListener('click', () => {
+      saveCurrentQA();
+      alert('Answer saved.');
+      scrollToTopInstant();
+    });
+
+    document.getElementById('smartNextBtn').addEventListener('click', () => {
+      saveCurrentQA();
+      if (currentQuestion < questions.length - 1){
+        currentQuestion++;
+        persist();
+        renderQuestion();
+      } else {
+        switchTab('call');
+      }
+    });
+
+    document.getElementById('prevQBtn').addEventListener('click', () => {
+      saveCurrentQA();
+      if (currentQuestion > 0){
+        currentQuestion--;
+        persist();
+        renderQuestion();
+      } else {
+        scrollToTopInstant();
+      }
+    });
+
+    function beginSurvey(){
+      switchTab('qa');
+      renderQuestion();
+    }
+
+    document.getElementById('toQaBtn').addEventListener('click', beginSurvey);
+    document.getElementById('beginSurveyBtn').addEventListener('click', beginSurvey);
+    document.getElementById('backToTopBtn').addEventListener('click', scrollToTopInstant);
+
+    function showResearchActions(){
+      document.getElementById('researchActions').style.display = 'flex';
+    }
+
+    function simulateCompanyResearch(){
+      const company = (document.getElementById('company').value || 'Prospect company').trim();
+      const website = (document.getElementById('website').value || 'website not entered').trim();
+      const propertyType = (document.getElementById('propertyType').value || 'Commercial').trim();
+      const sites = (document.getElementById('sites').value || '1').trim();
+
+      companyResearchText = `COMPANY RESEARCH REPORT (SIMULATED)
+
+Company / Property:
+- ${company}
+- Website entered: ${website}
+- Property type: ${propertyType}
+- Sites / Buildings: ${sites}
+
+Likely Operating Context:
+- Visible service environment with occupant-facing standards
+- High sensitivity to complaint-driven issues and response time
+- Strong opportunity to position City Wide as a simpler management solution
+
+Likely Pain Points to Explore:
+- Vendor follow-up and accountability
+- Visible issues such as restrooms, trash, and common areas
+- Inconsistency across shifts, areas, or sites
+- Time lost managing service gaps
+
+Recommended Discovery Approach:
+- Lead with “make your job easier”
+- Ask where issues become most visible to occupants
+- Uncover what happens when service lapses are not corrected quickly
+- Reinforce one point of contact and faster follow-up`;
+
+      document.getElementById('companyReport').style.display = 'block';
+      document.getElementById('companyReport').textContent = companyResearchText;
+
+      if (!document.getElementById('approach').value.trim()){
+        document.getElementById('approach').value = 'Lead with workload reduction, visible complaint areas, vendor accountability, and one accountable point of contact.';
+      }
+      showResearchActions();
+      persist();
+      document.getElementById('companyReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function simulateContactResearch(){
+      const contact = (document.getElementById('contact').value || 'Prospect contact').trim();
+      const role = (document.getElementById('role').value || 'Property Manager').trim();
+      const company = (document.getElementById('company').value || 'the property').trim();
+      const firstName = (contact.split(' ')[0] || contact);
+
+      contactResearchText = `CONTACT RESEARCH REPORT (SIMULATED)
+
+Professional Profile Summary:
+- ${contact}
+- Role entered: ${role}
+- Meeting at: ${company}
+
+Likely Professional Focus for ${firstName}:
+- Reduce time spent chasing vendors and unresolved issues
+- Prevent visible service failures before complaints escalate
+- Protect management credibility with tenants, staff, and leadership
+- Improve follow-up without adding another layer to manage
+
+Likely Conversation Angles for ${firstName}:
+- “What part of managing this today takes the most time?”
+- “Where are issues most visible to the people in the building?”
+- “What would make a service partner easier for you to manage?”
+- “What happens when these issues are not handled quickly?”
+
+Likely Value Triggers:
+- One point of contact
+- Better accountability
+- Faster response
+- Fewer complaints with less oversight`;
+
+      document.getElementById('contactReport').style.display = 'block';
+      document.getElementById('contactReport').textContent = contactResearchText;
+
+      const contextBox = document.getElementById('context');
+      if (!contextBox.value.trim()){
+        contextBox.value = `${contact} likely values responsiveness, simplicity, visible quality control, and less vendor-chasing.`;
+      }
+      showResearchActions();
+      persist();
+      document.getElementById('contactReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('researchCompanyBtn').addEventListener('click', simulateCompanyResearch);
+    document.getElementById('researchContactBtn').addEventListener('click', simulateContactResearch);
+
+    function getNextQuestion(){
+      const issues = selectedFrom('issues');
+      const objections = selectedFrom('objections');
+      const drivers = selectedFrom('drivers');
+      const details = selectedFrom('details');
+      const timeline = selectedFrom('timeline');
+      const combinedAnswers = (state.answers.join(" ") + " " + state.extraNotes.join(" ")).toLowerCase();
+
+      if (timeline.includes('Immediate')) return "What would need to happen next for you to feel comfortable moving forward quickly?";
+      if (combinedAnswers.includes('vendor') || combinedAnswers.includes('follow') || issues.includes('Vendor follow-up')) {
+        return "When something is missed, what does the follow-up process look like today, and where does it usually break down?";
+      }
+      if (combinedAnswers.includes('restroom') || combinedAnswers.includes('trash') || issues.includes('Restrooms') || issues.includes('Trash')) {
+        return "How often are restroom or trash issues being noticed before someone on your side has to raise the flag?";
+      }
+      if (combinedAnswers.includes('one point of contact') || drivers.includes('One point of contact')) {
+        return "How valuable would it be if one person owned communication, accountability, and follow-up across the whole scope?";
+      }
+      if (details.includes('Ownership visibility')) {
+        return "When ownership notices service problems, what kind of pressure or follow-up does that create for you?";
+      }
+      if (combinedAnswers.includes('easier') || drivers.includes('Make my job easier')) {
+        return "If we could take one recurring headache off your plate immediately, which one would matter most?";
+      }
+      if (objections.includes('Price sensitive')) {
+        return "Is lowest price the main factor, or is the bigger issue getting reliable outcomes without more management time on your side?";
+      }
+      return "Where do service issues create the most visibility, complaints, or extra work for you right now?";
+    }
+
+    document.getElementById('suggestBtn').addEventListener('click', () => {
+      document.getElementById('nextQuestion').textContent = getNextQuestion();
+      persist();
+      scrollToTopInstant();
+    });
+
+    function val(id){ return document.getElementById(id).value.trim(); }
+
+    function inferSelectionsFromAnswers(){
+      const text = (state.answers.join(" ") + " " + state.extraNotes.join(" ")).toLowerCase();
+      const chips = [...document.querySelectorAll('.chip')];
+      function activateByText(matchText){
+        chips.forEach(chip => {
+          if (chip.textContent.trim().toLowerCase() === matchText.toLowerCase()){
+            chip.classList.add('active');
+          }
+        });
+      }
+
+      if (text.includes('vendor') || text.includes('follow-up') || text.includes('follows through') || text.includes('chasing vendors')) activateByText('Vendor follow-up');
+      if (text.includes('restroom')) activateByText('Restrooms');
+      if (text.includes('trash')) activateByText('Trash');
+      if (text.includes('inconsisten')) activateByText('Consistency');
+      if (text.includes('communicat')) activateByText('Communication');
+      if (text.includes('one point of contact')) activateByText('One point of contact');
+      if (text.includes('easier') || text.includes('more to my plate') || text.includes('takes too much time')) activateByText('Make my job easier');
+      if (text.includes('faster response')) activateByText('Fast response time');
+      if (text.includes('accountability')) activateByText('Better accountability');
+      if (text.includes('complaint')) activateByText('Reduce complaints');
+      if (text.includes('ownership')) activateByText('Ownership visibility');
+      if (text.includes('tenant') || text.includes('visitor') || text.includes('staff complain')) activateByText('Tenant-facing issues');
+      if (text.includes('multiple') || text.includes('all locations')) activateByText('Multi-site complexity');
+      if (text.includes('same problems keep coming back') || text.includes('repeat')) activateByText('Current vendor gaps');
+      if (text.includes('escalate')) activateByText('Escalation risk');
+      if (text.includes('follow through')) activateByText('Need proof of consistency');
+    }
+
+    function buildSummary(){
+      inferSelectionsFromAnswers();
+
+      const company = val('company') || 'Not provided';
+      const contact = val('contact') || 'Not provided';
+      const role = val('role') || 'Not provided';
+      const propertyType = val('propertyType') || 'Not provided';
+      const sites = val('sites') || 'Not provided';
+      const website = val('website') || 'Not provided';
+      const context = val('context') || 'None entered';
+      const approach = val('approach') || 'No prep approach entered';
+      const notes = val('notes') || 'No notes entered';
+
+      const issues = selectedFrom('issues');
+      const objections = selectedFrom('objections');
+      const drivers = selectedFrom('drivers');
+      const details = selectedFrom('details');
+      const timeline = selectedFrom('timeline');
+      const authority = selectedFrom('authority');
+      const interest = selectedFrom('interest');
+
+      const topIssues = issues.length ? issues.join(', ') : 'No specific operational issues selected';
+      const topObjections = objections.length ? objections.join(', ') : 'No objections selected';
+      const topDrivers = drivers.length ? drivers.join(', ') : 'No decision drivers selected';
+      const detailFlags = details.length ? details.join(', ') : 'No additional detail flags selected';
+      const qaBlock = state.answers.map((a, i) => {
+        const note = state.extraNotes[i] ? `\nRep note: ${state.extraNotes[i]}` : '';
+        return `${questions[i].text}\nAnswer: ${a || 'No answer captured'}${note}`;
+      }).join("\n\n");
+
+      const recommendedApproach = [];
+      if (drivers.includes('Make my job easier')) recommendedApproach.push("Position City Wide as a simplification partner that reduces management burden rather than adding another layer to oversee.");
+      if (drivers.includes('One point of contact')) recommendedApproach.push("Emphasize one accountable point of contact and centralized follow-up.");
+      if (issues.includes('Vendor follow-up') || issues.includes('Communication')) recommendedApproach.push("Lead with response speed, documented follow-up, and accountability.");
+      if (issues.includes('Restrooms') || issues.includes('Trash')) recommendedApproach.push("Show a scope built around visible, high-frequency pain points that affect perception quickly.");
+      if (details.includes('Ownership visibility')) recommendedApproach.push("Tie service consistency to reputation, leadership visibility, and reduced escalation.");
+      if (objections.includes('Price sensitive')) recommendedApproach.push("Frame value around fewer complaints, less time spent chasing vendors, and consistency rather than lowest cost.");
+      if (!recommendedApproach.length) recommendedApproach.push("Use a consultative approach focused on visible pain points, accountability, and making the prospect’s role easier.");
+
+      const nextStep = objections.includes('Happy with current vendor')
+        ? "Offer a no-pressure walkthrough and identify areas where service consistency or communication could improve."
+        : "Propose a walkthrough and tailored scope based on the issues, answers, and priorities discussed.";
+
+      generatedSummary = `MEETING SUMMARY
+
+Prospect / Property:
+- Company: ${company}
+- Contact: ${contact}
+- Role: ${role}
+- Property Type: ${propertyType}
+- Sites / Buildings: ${sites}
+- Website: ${website}
+
+Company Research Report:
+${companyResearchText || 'No company research generated'}
+
+Contact Research Report:
+${contactResearchText || 'No contact research generated'}
+
+Pre-Call Context:
+${context}
+
+Suggested Prep Approach:
+${approach}
+
+Guided Discovery Answers:
+${qaBlock}
+
+Call Signals:
+- Timeline: ${timeline.length ? timeline.join(', ') : 'Not captured'}
+- Authority: ${authority.length ? authority.join(', ') : 'Not captured'}
+- Interest Level: ${interest.length ? interest.join(', ') : 'Not captured'}
+
+Key Issues Identified:
+${topIssues}
+
+Objections / Concerns:
+${topObjections}
+
+Decision Drivers:
+${topDrivers}
+
+Additional Detail Flags:
+${detailFlags}
+
+Rep Notes:
+${notes}
+
+Suggested Next Best Question:
+${getNextQuestion()}
+
+Recommended Approach:
+- ${recommendedApproach.join("\n- ")}
+
+Recommended Next Step:
+- ${nextStep}
+
+Internal Demo Note:
+- This summary was generated by a local concept prototype and is intended only to demonstrate workflow and usability.`;
+
+      document.getElementById('summaryOutput').textContent = generatedSummary;
+      document.getElementById('editableSummary').value = generatedSummary;
+      summaryBeforeEdit = generatedSummary;
+      persist();
+      switchTab('summary');
+    }
+
+    document.getElementById('buildSummaryBtn').addEventListener('click', buildSummary);
+
+    document.getElementById('editSummaryBtn').addEventListener('click', () => {
+      summaryBeforeEdit = document.getElementById('summaryOutput').textContent;
+      document.getElementById('editableSummary').value = summaryBeforeEdit;
+      document.getElementById('summaryOutput').style.display = 'none';
+      document.getElementById('editArea').style.display = 'block';
+      document.getElementById('editSummaryBtn').style.display = 'none';
+      document.getElementById('saveSummaryBtn').style.display = 'inline-block';
+      document.getElementById('cancelEditBtn').style.display = 'inline-block';
+      scrollToTopInstant();
+    });
+
+    document.getElementById('saveSummaryBtn').addEventListener('click', () => {
+      const val = document.getElementById('editableSummary').value;
+      document.getElementById('summaryOutput').textContent = val;
+      document.getElementById('summaryOutput').style.display = 'block';
+      document.getElementById('editArea').style.display = 'none';
+      document.getElementById('editSummaryBtn').style.display = 'inline-block';
+      document.getElementById('saveSummaryBtn').style.display = 'none';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      generatedSummary = val;
+      persist();
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+      document.getElementById('editableSummary').value = summaryBeforeEdit;
+      document.getElementById('summaryOutput').style.display = 'block';
+      document.getElementById('editArea').style.display = 'none';
+      document.getElementById('editSummaryBtn').style.display = 'inline-block';
+      document.getElementById('saveSummaryBtn').style.display = 'none';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      scrollToTopInstant();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const txt = document.getElementById('summaryOutput').textContent;
+      try{
+        await navigator.clipboard.writeText(txt);
+        alert('Summary copied to clipboard.');
+      } catch(e){
+        alert('Clipboard copy was blocked by this browser. You can still select and copy the text manually.');
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+
+    function persist(){
+      const payload = {
+        company: val('company'),
+        role: val('role'),
+        propertyType: document.getElementById('propertyType').value,
+        sites: val('sites'),
+        website: val('website'),
+        contact: val('contact'),
+        context: val('context'),
+        approach: val('approach'),
+        notes: val('notes'),
+        currentQuestion,
+        answers: state.answers,
+        extraNotes: state.extraNotes,
+        companyResearchText,
+        contactResearchText,
+        generatedSummary,
+        selected: {
+          timeline: selectedFrom('timeline'),
+          authority: selectedFrom('authority'),
+          interest: selectedFrom('interest'),
+          issues: selectedFrom('issues'),
+          objections: selectedFrom('objections'),
+          drivers: selectedFrom('drivers'),
+          details: selectedFrom('details')
+        },
+        activeTab: [...tabs].find(t => t.classList.contains('active'))?.dataset.tab || 'prep'
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function restore(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        document.getElementById('company').value = data.company || "";
+        document.getElementById('role').value = data.role || "";
+        document.getElementById('propertyType').value = data.propertyType || "";
+        document.getElementById('sites').value = data.sites || "";
+        document.getElementById('website').value = data.website || "";
+        document.getElementById('contact').value = data.contact || "";
+        document.getElementById('context').value = data.context || "";
+        document.getElementById('approach').value = data.approach || "";
+        document.getElementById('notes').value = data.notes || "";
+        currentQuestion = data.currentQuestion || 0;
+        state.answers = data.answers || ["","","",""];
+        state.extraNotes = data.extraNotes || ["","","",""];
+        companyResearchText = data.companyResearchText || "";
+        contactResearchText = data.contactResearchText || "";
+        generatedSummary = data.generatedSummary || "";
+
+        if (companyResearchText){
+          document.getElementById('companyReport').style.display = 'block';
+          document.getElementById('companyReport').textContent = companyResearchText;
+        }
+        if (contactResearchText){
+          document.getElementById('contactReport').style.display = 'block';
+          document.getElementById('contactReport').textContent = contactResearchText;
+        }
+        if (companyResearchText || contactResearchText){
+          showResearchActions();
+        }
+
+        if (data.selected){
+          setChipSelections('timeline', data.selected.timeline);
+          setChipSelections('authority', data.selected.authority);
+          setChipSelections('interest', data.selected.interest);
+          setChipSelections('issues', data.selected.issues);
+          setChipSelections('objections', data.selected.objections);
+          setChipSelections('drivers', data.selected.drivers);
+          setChipSelections('details', data.selected.details);
+        }
+
+        if (generatedSummary){
+          document.getElementById('summaryOutput').textContent = generatedSummary;
+          document.getElementById('editableSummary').value = generatedSummary;
+        }
+
+        renderQuestion();
+        renderAnswerLog();
+        switchTab(data.activeTab || 'prep');
+      } catch(e){
+        console.log("Restore failed", e);
+      }
+    }
+
+    function updateNetworkBadge(){
+      const badge = document.getElementById('netStatus');
+      if (navigator.onLine){
+        badge.textContent = 'Online';
+        badge.className = 'badge online';
+      } else {
+        badge.textContent = 'Offline / Weak Internet Mode';
+        badge.className = 'badge offline';
+      }
+    }
+    window.addEventListener('online', updateNetworkBadge);
+    window.addEventListener('offline', updateNetworkBadge);
+
+    document.getElementById('loadDemoBtn').addEventListener('click', () => {
+      document.getElementById('company').value = 'Harbor View Medical Plaza';
+      document.getElementById('contact').value = 'Hannah Carter';
+      document.getElementById('role').value = 'Property Manager';
+      document.getElementById('propertyType').value = 'Medical';
+      document.getElementById('sites').value = '3';
+      document.getElementById('website').value = 'harborviewmedical.example';
+      document.getElementById('context').value = 'Multi-site operation. Likely pain points around restrooms, trash, vendor follow-up, and complaint visibility. Hannah likely values simplicity and one accountable point of contact.';
+      document.getElementById('approach').value = 'Lead with workload reduction, visible complaint areas, one point of contact, and response accountability.';
+      document.getElementById('notes').value = 'Prospect shared that complaints are inconsistent across buildings and current follow-up requires too much chasing. Interested in a partner who can reduce management time and improve accountability.';
+
+      state.answers = [
+        'Following up with vendors takes too much time.',
+        'Restrooms and trash are the biggest complaints.',
+        'I want one point of contact who actually follows through.',
+        'It reflects poorly on management.'
+      ];
+      state.extraNotes = [
+        'She said she ends up chasing too many loose ends across multiple buildings.',
+        'She mentioned complaints often surface before her team catches them.',
+        'She wants less time spent managing follow-up herself.',
+        'She noted leadership notices when service slips.'
+      ];
+
+      companyResearchText = `COMPANY RESEARCH REPORT (SIMULATED)
+
+Company / Property:
+- Harbor View Medical Plaza
+- Website entered: harborviewmedical.example
+- Property type: Medical
+- Sites / Buildings: 3
+
+Likely Operating Context:
+- Visible service environment with staff, patients, and visitors
+- Strong need for accountability and fast response`;
+      contactResearchText = `CONTACT RESEARCH REPORT (SIMULATED)
+
+Professional Profile Summary:
+- Hannah Carter
+- Role entered: Property Manager
+- Meeting at: Harbor View Medical Plaza
+
+Likely Professional Focus for Hannah:
+- Reduce management burden
+- Prevent visible complaints
+- Improve follow-up and accountability`;
+
+      document.getElementById('companyReport').style.display = 'block';
+      document.getElementById('companyReport').textContent = companyResearchText;
+      document.getElementById('contactReport').style.display = 'block';
+      document.getElementById('contactReport').textContent = contactResearchText;
+      showResearchActions();
+
+      setChipSelections('issues', ['Restrooms','Trash','Vendor follow-up']);
+      setChipSelections('drivers', ['Make my job easier','One point of contact']);
+      setChipSelections('objections', ['Need proof of consistency']);
+      setChipSelections('timeline', ['Immediate']);
+      setChipSelections('authority', ['Decision maker']);
+      setChipSelections('interest', ['High']);
+      setChipSelections('details', ['Tenant-facing issues','Ownership visibility']);
+
+      currentQuestion = 0;
+      renderQuestion();
+      renderAnswerLog();
+      persist();
+      scrollToTopInstant();
+    });
+
+    ['company','role','sites','website','contact','context','approach','notes','qaAnswer','qaExtraNote','editableSummary'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', persist);
+    });
+    document.getElementById('propertyType').addEventListener('change', persist);
+
+    updateNetworkBadge();
+    renderQuestion();
+    renderAnswerLog();
+    restore();
+    scrollToTopInstant();
+  </script>
+</body>
+</html>
